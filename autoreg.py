@@ -7,6 +7,7 @@ import sys
 import asyncio
 import http.client
 import re
+import time
 from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -123,6 +124,7 @@ def send_extracted_word(word):
         print('No word found in parentheses.')
 
 def check_inbox(email):
+    time.sleep(5)
     conn = http.client.HTTPSConnection("temp-mail44.p.rapidapi.com")
 
     headers = {
