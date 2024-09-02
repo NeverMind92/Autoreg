@@ -23,6 +23,7 @@ required_packages = [
     'tqdm'
 ]
 EMAIL_CONFIG_FILE = 'config.json'
+SETTINGS_FILE = 'settings.json'
 SAVED_CREDS_FILE = 'accounts.txt'
 
 def install(package):
@@ -42,22 +43,41 @@ async def check_and_install_packages():
         for package in tqdm(not_installed, desc='Installing packages', unit='package'):
             install(package)
 
+def load_browser_choice():
+    if os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, 'r') as file:
+            return json.load(file).get('browser', None)
+    return None
+
+def save_browser_choice(browser):
+    with open(SETTINGS_FILE, 'w') as file:
+        json.dump({"browser": browser}, file)
+
 async def choose_browser():
-    print("Select a browser:")
-    print("1. Chrome")
-    print("2. Firefox")
-    print("3. Edge")
+    browser = load_browser_choice()
+
+    if not browser:
+        print("Select a browser:")
+        print("1. Chrome")
+        print("2. Firefox")
+        print("3. Edge")
+        
+        choice = input("Enter your selection number (1-3): ")
+        if choice == "1":
+            browser = "chrome"
+        elif choice == "2":
+            browser = "firefox"
+        elif choice == "3":
+            browser = "edge"
+        else:
+            print("Wrong choice, Chrome will be used by default.")
+            browser = "chrome"
+        
+        save_choice = input("Would you like to save this browser choice for future use? (y/n): ").strip().lower()
+        if save_choice == 'y':
+            save_browser_choice(browser)
     
-    choice = input("Enter your selection number (1-3): ")
-    if choice == "1":
-        return "chrome"
-    elif choice == "2":
-        return "firefox"
-    elif choice == "3":
-        return "edge"
-    else:
-        print("Wrong choice, Chrome will be used by default.")
-        return "chrome"
+    return browser
 
 def generate_password(length=12):
     characters = string.ascii_letters + string.digits + string.punctuation
@@ -128,7 +148,17 @@ async def automate_registration(email, username, password, driver):
         age_check = driver.find_element(By.NAME, 'Input.AgeCheck')
         if not age_check.is_selected():
             age_check.click()
+            
+        iframe = driver.find_element(By.XPATH, '//iframe[contains(@src, "hcaptcha.com")]')
+        driver.switch_to.frame(iframe)
 
+        checkbox = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, 'div#checkbox'))
+        )
+        checkbox.click()
+
+        driver.switch_to.default_content()
+        
         print("Please enter the CAPTCHA yourself and click the registration button.")
 
         registration_button_xpath = '//button[contains(text(), "Register")]'
