@@ -5,6 +5,8 @@ import json
 import subprocess
 import sys
 import asyncio
+import http.client
+import re
 from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -22,7 +24,6 @@ required_packages = [
     'selenium',
     'tqdm'
 ]
-EMAIL_CONFIG_FILE = 'config.json'
 SETTINGS_FILE = 'settings.json'
 SAVED_CREDS_FILE = 'accounts.txt'
 
@@ -87,49 +88,59 @@ def generate_username(length=8):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choices(characters, k=length))
 
-def generate_email_with_single_dots(base_email):
-    username, domain = base_email.split('@')
-    new_username = []
+def fetch_email():
+    conn = http.client.HTTPSConnection("temp-mail44.p.rapidapi.com")
 
-    for char in username:
-        new_username.append(char)
-        if random.choice([True, False]) and (len(new_username) > 1 and new_username[-2] != '.'):
-            new_username.append('.')
-    if new_username[-1] == '.':
-        new_username.pop()
-    return ''.join(new_username) + f"@{domain}"
+    payload = "{\"key1\":\"value\",\"key2\":\"value\"}"
 
-def load_email_config(config_file):
-    if os.path.exists(config_file):
-        with open(config_file, 'r') as file:
-            return json.load(file).get('emails', [])
-    return []
+    headers = {
+        'x-rapidapi-key': "7d08ad6be7msh9fd48b2a2ab7c35p118242jsn6346a6c13bc1",
+        'x-rapidapi-host': "temp-mail44.p.rapidapi.com",
+        'Content-Type': "application/json"
+    }
 
-def save_email_config(config_file, email):
-    emails = load_email_config(config_file)
-    if email not in emails:
-        emails.append(email)
-    with open(config_file, 'w') as file:
-        json.dump({"emails": emails}, file)
+    conn.request("POST", "/api/v3/email/new", payload, headers)
 
-def get_email(email_config_file):
-    email_list = load_email_config(email_config_file)
+    res = conn.getresponse()
+    data = res.read()
 
-    if email_list:
-        print("Available emails:")
-        for i, email in enumerate(email_list):
-            print(f"{i + 1}. {email}")
+    response_json = json.loads(data.decode("utf-8"))
 
-        choice = input("Would you like to use one of these emails? (number/n): ")
-        if choice.lower() == 'n':
-            user_email = input("Enter your email address: ")
-            save_email_config(email_config_file, user_email)
-            return user_email
-        elif choice.isdigit() and 0 < int(choice) <= len(email_list):
-            return email_list[int(choice) - 1]
-    user_email = input("Enter your email address: ")
-    save_email_config(email_config_file, user_email)
-    return user_email
+    return response_json.get('email', '')
+
+def extract_word_in_parentheses(text):
+    match = re.search(r'\((.*?)\)', text)
+    if match:
+        word = match.group(1)
+        word = word.replace('\\u0026', '&')  
+        return word
+    return None
+
+def send_extracted_word(word):
+    if word:
+        print(f'Sending extracted word: {word}')
+    else:
+        print('No word found in parentheses.')
+
+def check_inbox(email):
+    conn = http.client.HTTPSConnection("temp-mail44.p.rapidapi.com")
+
+    headers = {
+        'x-rapidapi-key': "7d08ad6be7msh9fd48b2a2ab7c35p118242jsn6346a6c13bc1",
+        'x-rapidapi-host': "temp-mail44.p.rapidapi.com"
+    }
+
+    conn.request("GET", f"/api/v3/email/{email}/messages", headers=headers)
+
+    res = conn.getresponse()
+    data = res.read()
+
+    inbox_data = data.decode("utf-8")
+    print("Inbox data:", inbox_data)
+
+    word = extract_word_in_parentheses(inbox_data)
+    
+    send_extracted_word(word)
 
 async def automate_registration(email, username, password, driver):
     try:
@@ -186,10 +197,9 @@ async def main():
         username = input("Enter your username: ")
 
     password = generate_password()
-    chosen_email = get_email(EMAIL_CONFIG_FILE)
-    email_with_single_dots = generate_email_with_single_dots(chosen_email)
+    email = fetch_email()
 
-    print(f"Email: {email_with_single_dots}")
+    print(f"Email: {email}")
     print(f"Password: {password}")
 
     driver = None
@@ -210,9 +220,11 @@ async def main():
     with open(SAVED_CREDS_FILE, 'a') as f:
         f.write(f'username: {username}\n')
         f.write(f'password: {password}\n')
-        f.write(f'email: {email_with_single_dots}\n')
+        f.write(f'email: {email}\n')
 
-    await automate_registration(email_with_single_dots, username, password, driver)
+    await automate_registration(email, username, password, driver)
+    
+    check_inbox(email)
 
 if __name__ == "__main__":
     asyncio.run(main())
