@@ -124,7 +124,7 @@ def send_extracted_word(word):
         print('No word found in parentheses.')
 
 def check_inbox(email):
-    time.sleep(5)
+    time.sleep(20)
     conn = http.client.HTTPSConnection("temp-mail44.p.rapidapi.com")
 
     headers = {
