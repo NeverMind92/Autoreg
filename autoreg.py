@@ -28,23 +28,6 @@ required_packages = [
 SETTINGS_FILE = 'settings.json'
 SAVED_CREDS_FILE = 'accounts.txt'
 
-def install(package):
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', package], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-
-async def check_and_install_packages():
-    not_installed = []
-
-    for package in required_packages:
-        try:
-            __import__(package)
-        except ImportError:
-            not_installed.append(package)
-
-    if not_installed:
-        print('\nInstalling missing packages...')
-        for package in tqdm(not_installed, desc='Installing packages', unit='package'):
-            install(package)
-
 def load_browser_choice():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as file:
