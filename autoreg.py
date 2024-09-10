@@ -76,7 +76,7 @@ def fetch_email():
     payload = "{\"key1\":\"value\",\"key2\":\"value\"}"
 
     headers = {
-        'x-rapidapi-key': "7d08ad6be7msh9fd48b2a2ab7c35p118242jsn6346a6c13bc1",
+        'x-rapidapi-key': "9b78704a6fmshf2912da92c2f975p1fa789jsndd8b34cafd3d",
         'x-rapidapi-host': "temp-mail44.p.rapidapi.com",
         'Content-Type': "application/json"
     }
@@ -109,7 +109,7 @@ def check_inbox(email):
     conn = http.client.HTTPSConnection("temp-mail44.p.rapidapi.com")
 
     headers = {
-        'x-rapidapi-key': "7d08ad6be7msh9fd48b2a2ab7c35p118242jsn6346a6c13bc1",
+        'x-rapidapi-key': "9b78704a6fmshf2912da92c2f975p1fa789jsndd8b34cafd3d",
         'x-rapidapi-host': "temp-mail44.p.rapidapi.com"
     }
 
