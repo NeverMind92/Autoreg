@@ -21,10 +21,13 @@ from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.chrome.options import Options
 
+#На Csh за Марсель не банят?
+
 required_packages = [
     'selenium',
     'tqdm'
 ]
+
 SETTINGS_FILE = 'settings.json'
 SAVED_CREDS_FILE = 'accounts.txt'
 
