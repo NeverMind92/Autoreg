@@ -110,7 +110,7 @@ def send_extracted_word(word):
         print('No word found in parentheses.')
 
 def check_inbox(email):
-    time.sleep(20)
+    time.sleep(30)
     conn = http.client.HTTPSConnection("temp-mail44.p.rapidapi.com")
 
     headers = {
@@ -174,7 +174,6 @@ async def automate_registration(email, username, password, driver):
         driver.quit()
 
 async def main():
-    await check_and_install_packages()
     browser_choice = await choose_browser()
 
     auto_generate_username = input("Do you want to automatically generate a username? (y/n): ").strip().lower() == 'y'
