@@ -208,8 +208,13 @@ async def main():
     
     check_inbox(email)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+async def run_script():
+    while True:
+        await main() 
+        choice = input("restart the script? (y/n): ").strip().lower() == 'n'
+        if choice:
+            print("Exits")
+            break
 
-print("ЖДИ ДОКС ЛИБО ВЫЙДИ")
-input()
+if __name__ == "__main__":
+    asyncio.run(run_script())
