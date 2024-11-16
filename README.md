@@ -1,5 +1,5 @@
 # Autoreg
-**Automatical registration for space station 14**
+**Automatical registration for space station 14**(220 STRINGS OF CODE NOWAY CURSE 220)
 # Installation
 **Clone and Install Script**
 ```shell script
